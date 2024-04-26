@@ -3,12 +3,12 @@ package com.aws.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
+import com.aws.utility.FileNameUtility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -20,36 +20,37 @@ public class S3Service implements FileService{
     @Value("${bucketname}")
     private String bucketName;
 
-
     private final AmazonS3 s3;
 
     public S3Service(AmazonS3 s3) {
         this.s3 = s3;
     }
 
-
     @Override
     public String saveFile(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
+        /**
+         *  it will save directly to the bucket, but if you want to save it in any folder
+         *  which is created under that bucket than we have to give folder name in the filename
+         *  @Example
+         *  images/file.png
+         */
+//        String filename = file.getOriginalFilename();
+        String filename = FileNameUtility.getFileNameAccordingToTheFileType(file.getOriginalFilename());
         try{
             File convertedFile = convertMultiPartToFile(file);
-            PutObjectResult putObjectResult = s3.putObject(bucketName, originalFilename, convertedFile);
+            PutObjectResult putObjectResult = s3.putObject(bucketName, filename, convertedFile);
             return putObjectResult.getContentMd5();
-
         }
         catch (Exception e){
             throw new RuntimeException(e);
         }
-
     }
-
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convFile=new File(file.getOriginalFilename());
         FileOutputStream fos=new FileOutputStream((convFile));
         fos.write(file.getBytes());
         fos.close();
         return convFile;
-
     }
 
 
