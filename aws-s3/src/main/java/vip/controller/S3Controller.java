@@ -40,6 +40,12 @@ public class S3Controller {
         return fileService.deleteFile(userId,originalFileName);
     }
 
+    @DeleteMapping("/s3/delete/all/{userId}")
+    public Map<String, Object>  deleteAllDataOfaUser(@PathVariable String userId) {
+        return fileService.deleteAllDataOfaUser(userId);
+    }
+
+
     @GetMapping("/get/all/file/{userId}")
     public List<String> getAllFile(@PathVariable String userId) {
 

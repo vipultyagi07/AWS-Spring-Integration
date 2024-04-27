@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import vip.secrets.Crypto;
+import vip.utility.Utils;
 
 @Configuration
 public class S3Configuration {
@@ -24,8 +26,9 @@ public class S3Configuration {
     private String region;
 
     @Bean
-    public AmazonS3 s3(){
-        AWSCredentials awsCredentials= new BasicAWSCredentials(accessKey,secretKey);
+    public AmazonS3 s3() throws Exception {
+        // I have encrypted the accessKey and secretKey.
+        AWSCredentials awsCredentials= new BasicAWSCredentials(Crypto.transform(accessKey, Utils.SECRET_KEY),Crypto.transform(secretKey, Utils.SECRET_KEY));
 
         return AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(
                 new AWSStaticCredentialsProvider(awsCredentials)).build();

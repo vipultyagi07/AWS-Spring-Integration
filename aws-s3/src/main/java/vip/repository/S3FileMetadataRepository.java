@@ -20,4 +20,7 @@ public interface S3FileMetadataRepository extends JpaRepository<S3FileMetadata,L
 
     @Query(value = "SELECT original_file_name FROM aws.s3_file_metadata where user_id=?1 and is_deleted=false",nativeQuery = true)
     List<String> findOriginalFileNameByUserIdIgnoreCaseAndIsDeletedFalse(String userId);
+
+    @Query(value = "SELECT * FROM aws.s3_file_metadata where user_id=?1 and is_deleted=false",nativeQuery = true)
+    List<S3FileMetadata> findFileNameByUserIdIgnoreCaseAndIsDeletedFalse(String userId);
 }

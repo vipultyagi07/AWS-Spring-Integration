@@ -161,4 +161,31 @@ public class S3Service implements FileService {
         result.put("data",save);
         return result;
     }
+
+    @Override
+    public Map<String, Object> deleteAllDataOfaUser(String userId) {
+
+        Map<String, Object>  result= new HashMap<>();
+        List<S3FileMetadata> fileMetadataList = s3FileMetadataRepository.findFileNameByUserIdIgnoreCaseAndIsDeletedFalse(userId);
+
+        if(Objects.isNull(fileMetadataList)){
+            result.put("status","No data is present ");
+            return result;
+        }
+        int count=1;
+        for(S3FileMetadata file:fileMetadataList){
+
+            s3.deleteObject(bucketName, file.getFileName());
+
+            file.setDeleted(true);
+            s3FileMetadataRepository.save(file);
+            result.put(count+" Successfully deleted",file.getOriginalFileName());
+            count++;
+
+        }
+        result.put("status",count+" files are deleted successfully");
+
+        return result;
+
+    }
 }

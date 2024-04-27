@@ -15,4 +15,6 @@ public interface FileService {
     List<String> listAllFiles(String userId);
 
     Map<String, Object>  deleteFile(String userId, String fileName);
+
+    Map<String, Object> deleteAllDataOfaUser(String userId);
 }
