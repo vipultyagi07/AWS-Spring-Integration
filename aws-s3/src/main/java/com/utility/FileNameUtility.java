@@ -1,4 +1,4 @@
-package com.aws.utility;
+package com.utility;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

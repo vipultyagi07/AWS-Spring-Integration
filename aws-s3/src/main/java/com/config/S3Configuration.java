@@ -1,4 +1,4 @@
-package com.aws.config;
+package com.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
