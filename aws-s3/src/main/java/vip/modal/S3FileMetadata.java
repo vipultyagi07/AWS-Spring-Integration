@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 
@@ -37,16 +35,16 @@ public class S3FileMetadata {
     private String contentType;
 
     @Column(name = "last_modified")
-    @LastModifiedDate
     private Date lastModified;
 
     @Column(name = "created_Date")
-    @CreatedDate
     private Date createdDate;
 
     private String etag;
 
     private String userId;
+
+    private boolean isDeleted;
 
 
     public S3FileMetadata() {

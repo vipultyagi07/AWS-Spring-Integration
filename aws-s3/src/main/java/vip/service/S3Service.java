@@ -3,6 +3,7 @@ package vip.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
+import jakarta.persistence.EntityNotFoundException;
 import vip.modal.S3FileMetadata;
 import vip.repository.S3FileMetadataRepository;
 import vip.utility.FileNameUtility;
@@ -48,7 +49,7 @@ public class S3Service implements FileService {
         String filename = FileNameUtility.getFileNameAccordingToTheFileType(originalFilename);
         try {
 
-            S3FileMetadata existingFile = s3FileMetadataRepository.findByOriginalFileName(originalFilename);
+            S3FileMetadata existingFile = s3FileMetadataRepository.findByOriginalFileNameAndUserIdAndIsDeletedIsFalse(originalFilename,userId);
             if (Objects.nonNull(existingFile)) {
                 result.put("Status", "File with same name :'" + existingFile.getOriginalFileName() + "' already exist in the system");
                 return result;
@@ -118,26 +119,46 @@ public class S3Service implements FileService {
 
 
     @Override
-    public byte[] downloadFile(String fileName) {
+    public Map<String,Object> downloadFile(String userId,String originalFileName) {
+        S3FileMetadata existingUserMetaData=s3FileMetadataRepository.findByOriginalFileNameAndUserIdAndIsDeletedIsFalse(originalFileName,userId);
+        if(Objects.isNull(existingUserMetaData)){
+            throw new EntityNotFoundException("no data is present for this user");
+        }
+        Map<String,Object> result=new HashMap<>();
+        result.put("fileName",existingUserMetaData.getOriginalFileName());
+        String fileName = existingUserMetaData.getFileName();
         S3Object object = s3.getObject(bucketName, fileName);
         S3ObjectInputStream objectContent = object.getObjectContent();
         try {
-            return IOUtils.toByteArray(objectContent);
+            result.put("data",IOUtils.toByteArray(objectContent));
+            return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<String> listAllFiles() {
-        ListObjectsV2Result listObjectsV2Result = s3.listObjectsV2(bucketName);
-        return listObjectsV2Result.getObjectSummaries().stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
+    public List<String> listAllFiles(String userId) {
 
+        return s3FileMetadataRepository.findOriginalFileNameByUserIdIgnoreCaseAndIsDeletedFalse(userId);
     }
 
     @Override
-    public String deleteFile(String fileName) {
+    public Map<String, Object>  deleteFile(String userId,String originalFileName) {
+        Map<String, Object>  result= new HashMap<>();
+
+        S3FileMetadata existingUserMetaData=s3FileMetadataRepository.findByOriginalFileNameAndUserIdAndIsDeletedIsFalse(originalFileName,userId);
+        if(Objects.isNull(existingUserMetaData)){
+            result.put("status","No such data is present ");
+            return result;
+        }
+        String fileName = existingUserMetaData.getFileName();
         s3.deleteObject(bucketName, fileName);
-        return "file deleted";
+        existingUserMetaData.setDeleted(true);
+        S3FileMetadata save = s3FileMetadataRepository.save(existingUserMetaData);
+        result.put("status","File deleted successfully");
+        result.put("fileName",originalFileName);
+        result.put("data",save);
+        return result;
     }
 }

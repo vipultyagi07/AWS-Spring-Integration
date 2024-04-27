@@ -9,9 +9,10 @@ public interface FileService {
 
     Map<String,Object> saveFile(MultipartFile file, String userId);
 
-    byte[] downloadFile(String fileName);
+    Map<String,Object> downloadFile(String userId,String originalFileName);
 
-    List<String> listAllFiles();
 
-    String deleteFile(String fileName);
+    List<String> listAllFiles(String userId);
+
+    Map<String, Object>  deleteFile(String userId, String fileName);
 }
