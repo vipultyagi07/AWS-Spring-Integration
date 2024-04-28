@@ -1,9 +1,11 @@
 package vip.controller;
 
+import org.apache.tomcat.util.http.fileupload.RequestContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import vip.modal.ProjectDetail;
 import vip.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,8 @@ public class S3Controller {
     private FileService fileService;
 
     @PostMapping("/s3/file/upload/{userId}")
-    public Map<String, Object> upload(@RequestParam("file")MultipartFile file,@PathVariable String userId){
-        return fileService.saveFile(file,userId);
+    public Map<String, Object> upload(@RequestParam("file")MultipartFile file, @PathVariable String userId, @RequestBody ProjectDetail projectDetail){
+        return fileService.saveFile(file,userId,projectDetail);
     }
 
     @GetMapping("/s3/file/download/{userId}/{originalFileName}")

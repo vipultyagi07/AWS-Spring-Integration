@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import jakarta.persistence.EntityNotFoundException;
+import vip.modal.ProjectDetail;
 import vip.modal.S3FileMetadata;
 import vip.repository.S3FileMetadataRepository;
 import vip.utility.FileNameUtility;
@@ -29,12 +30,15 @@ public class S3Service implements FileService {
     @Autowired
     private S3FileMetadataRepository s3FileMetadataRepository;
 
+    @Autowired
+    private ProjectDetailService projectDetailService;
+
     public S3Service(AmazonS3 s3) {
         this.s3 = s3;
     }
 
     @Override
-    public Map<String, Object> saveFile(MultipartFile file, String userId) {
+    public Map<String, Object> saveFile(MultipartFile file, String userId, ProjectDetail projectDetail) {
 
         Map<String, Object> result = new HashMap<>();
 
@@ -48,6 +52,8 @@ public class S3Service implements FileService {
         String originalFilename = file.getOriginalFilename();
         String filename = FileNameUtility.getFileNameAccordingToTheFileType(originalFilename);
         try {
+
+            projectDetailService.saveProjectDetailsWithUser(projectDetail,userId);
 
             S3FileMetadata existingFile = s3FileMetadataRepository.findByOriginalFileNameAndUserIdAndIsDeletedIsFalse(originalFilename,userId);
             if (Objects.nonNull(existingFile)) {
