@@ -1,0 +1,1 @@
+export JASYPT_ENCRYPTOR_PASSWORD=secretKey
